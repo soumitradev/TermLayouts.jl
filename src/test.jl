@@ -67,10 +67,13 @@ function test()
   cmdhist = []
   cmdhistcursor = -1
   replstr = ""
-  print(current_prompt)
+  # print(current_prompt)
   replstr *= current_prompt
 
   while !should_exit
+    print("\e[2J")
+    print(replstr)
+    # lpanel.content = replstr
     # top = lpanel * rpanel
     # print(Term.Panel(
     #   top,
@@ -97,22 +100,21 @@ function test()
 
       if LAST_CMD_WAS_ERR[]
         # Stray newline for printing errors properly
-        println()
+        # println()
         replstr *= "\n"
       else
         # Delete last line
         if (length(cmdhist) > 0)
-          print("\x1b[1A")
-          print("\x1b[2K")
+          reploutarr = split(replstr, '\n')
+          replstr = join(reploutarr[1:length(reploutarr)-1], "\n")
         end
         # print output of command
-        println(outstr)
-        replstr *= outstr
+        # println(outstr)
+        replstr *= outstr * "\n"
       end
       # Print the prompt for the next prompt, and add command to command history
-      print(current_prompt)
-      replstr *= outstr
-      # lpanel.content *= outstr
+      # print(current_prompt)
+      replstr *= current_prompt
       push!(cmdhist, String(curcmd))
       curcmd = ""
       cmdcursor = 1
@@ -132,7 +134,6 @@ function test()
     elseif control_value == '\e' * '[' * 'A'
       # Move through command history
       if length(cmdhist) > 0
-        # print("\x1b[1A")
         # Keep history cursor in bounds
         if cmdhistcursor < 0
           cmdhistcursor = length(cmdhist)
@@ -141,13 +142,21 @@ function test()
           cmdhistcursor -= 1
         end
         # Delete what was typed before, and replace it with the command in history
-        reploutarr = split(replstr, '\n')
-        replstr = join(reploutarr[1:length(reploutarr)-2], "\n")
-        print("\x1b[2K")
-        print(current_prompt)
-        replstr *= current_prompt
-        print(cmdhist[cmdhistcursor])
-        replstr *= cmdhist[cmdhistcursor]
+        reploutarr = collect(split(replstr, '\n'))
+        reploutarr = reploutarr[1:length(reploutarr)-1]
+        reploutarr = push!(reploutarr, current_prompt * cmdhist[cmdhistcursor])
+        # print("\x1b[2K")
+        # print(current_prompt)
+        # print(cmdhist[cmdhistcursor])
+
+        # replstr *= current_prompt
+        # replstr *= cmdhist[cmdhistcursor]
+
+        replstr = join(reploutarr, "\n")
+
+        print("\e[2J")
+        print(replstr)
+
         curcmd = cmdhist[cmdhistcursor]
         cmdcursor = length(cmdhist[cmdhistcursor]) + 1
       end
@@ -158,40 +167,42 @@ function test()
       if cmdhistcursor < length(cmdhist) + 1
         # print("\x1b[1A")
         # Clear line and replace command
-        reploutarr = split(replstr, '\n')
-        replstr = join(reploutarr[1:length(reploutarr)-2], "\n")
-        print("\x1b[2K")
-        print(current_prompt)
-        replstr *= current_prompt
+        reploutarr = collect(split(replstr, '\n'))
+        reploutarr = reploutarr[1:length(reploutarr)-1]
+        # print("\x1b[2K")
+        # print(current_prompt)
+        curstr = current_prompt
         cmdhistcursor += 1
         if cmdhistcursor < length(cmdhist) + 1
-          print(cmdhist[cmdhistcursor])
-          replstr *= cmdhist[cmdhistcursor]
+          # print(cmdhist[cmdhistcursor])
+          curstr *= cmdhist[cmdhistcursor]
           curcmd = cmdhist[cmdhistcursor]
           cmdcursor = length(cmdhist[cmdhistcursor]) + 1
         else
           curcmd = ""
           cmdcursor = 1
         end
+        reploutarr = push!(reploutarr, curstr)
+        replstr = join(reploutarr, "\n")
       end
     elseif control_value == :BACKSPACE
       if cmdcursor > 1
         # Either remove characters from the end or remove characters in between the typed command
         if cmdcursor == length(curcmd) + 1
           cmdcursor -= 1
-          print('\x08')
-          print("\x1b[0K")
+          # print('\x08')
+          # print("\x1b[0K")
           replstr = replstr[1:length(replstr)-1]
           curcmd = String(append!(collect(curcmd[1:cmdcursor-1]), collect(curcmd[cmdcursor+1:length(curcmd)])))
         else
           cmdcursor -= 1
           reploutarr = split(replstr, '\n')
           replstr = join(reploutarr[1:length(reploutarr)-2], "\n")
-          print("\x1b[2K")
-          print(current_prompt)
+          # print("\x1b[2K")
+          # print(current_prompt)
           replstr *= current_prompt
           curcmd = String(append!(collect(curcmd[1:cmdcursor-1]), collect(curcmd[cmdcursor+1:length(curcmd)])))
-          print(curcmd)
+          # print(curcmd)
           replstr *= curcmd
           print("\e[$(length(curcmd) - cmdcursor + 1)D")
         end
@@ -201,26 +212,25 @@ function test()
       if cmdcursor == length(curcmd) + 1
         curcmd *= string(control_value)
         cmdcursor += 1
-        print(control_value)
+        # print(control_value)
         replstr *= control_value
       else
         # If cursor is in the middle of prompt, add character in middle
         curcmd = String(insert!(collect(curcmd), cmdcursor, control_value))
         cmdcursor += 1
-        print("\x1b[2K")
+        # print("\x1b[2K")
         reploutarr = split(replstr, '\n')
         replstr = join(reploutarr[1:length(reploutarr)-2], "\n")
-        print(current_prompt)
+        # print(current_prompt)
         replstr *= current_prompt
-        print(curcmd)
+        # print(curcmd)
         replstr *= curcmd
         print("\e[$(length(curcmd) - cmdcursor + 1)D")
         # lpanel.content *= String(control_value)
       end
     end
-
     # write(inputbuf, control_value)
-    sleep(1e-2) # 10ms should be enough for most keyboard event
+    # sleep(1e-2) # 10ms should be enough for most keyboard event
   end
 
   # Delete line (^U) and close REPL (^D)
