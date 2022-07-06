@@ -1,22 +1,8 @@
+using Term
+
 include("core/core.jl")
 
 function test()
-  # Create panels and give them default sizes
-  fullh = Int(round(Term.consoles.console_height()))
-  fullw = Int(round(Term.consoles.console_width()))
-  lpanelw = Int(round(fullw * 2 / 3))
-  lpanel = Term.Panel(
-    width=lpanelw - 4,
-    height=fullh - 2,
-    style="red"
-  )
-  line = " " / Term.vLine(lpanel.measure.h - 2; style="dim bold")
-  rpanel = Term.Panel(
-    width=fullw - lpanelw - 2,
-    height=fullh - 2,
-    style="blue"
-  )
-
   # Create pipes
   inputbuf = Pipe()
   outputbuf = Pipe()
@@ -34,7 +20,7 @@ function test()
 
   # Start REPL
   println("starting REPL...")
-  # hook_repl(repl)
+  hook_repl(repl)
   start_eval_backend()
   println("finished starting REPL")
 
@@ -53,7 +39,7 @@ function test()
   println("running setup cmds")
   for cmd in setup_commands
     write(inputbuf.in, cmd)
-    sleep(0.3)
+    sleep(1)
     current_prompt = split(String(readavailable(outputbuf.out)), '\n')
     current_prompt = current_prompt[length(current_prompt)]
   end
@@ -71,15 +57,31 @@ function test()
   replstr *= current_prompt
 
   while !should_exit
+    # Clear screen
     print("\e[2J")
-    print(replstr)
-    # lpanel.content = replstr
-    # top = lpanel * rpanel
+    # Create panels and give them default sizes
+    fullh = Int(round(Term.Consoles.console_height()))
+    fullw = Int(round(Term.Consoles.console_width()))
+    lpanelw = Int(round(fullw * 2 / 3))
+    lpanel = Term.Panel(
+      replstr,
+      width=lpanelw - 4,
+      height=fullh - 3,
+      style="red"
+    )
+    # line = " " / Term.vLine(lpanel.measure.h - 2; style="dim bold")
+    rpanel = Term.Panel(
+      width=fullw - lpanelw - 2,
+      height=fullh - 3,
+      style="blue"
+    )
+    top = lpanel * rpanel
     # print(Term.Panel(
     #   top,
     #   width=fullw,
-    #   height=fullh,
+    #   height=fullh - 1,
     # ))
+    print(replstr)
     # sleep(1 / 15) # 10ms should be enough for most keyboard event
 
     # Read in keys
@@ -173,7 +175,7 @@ function test()
         # print(current_prompt)
         curstr = current_prompt
         cmdhistcursor += 1
-        if cmdhistcursor < length(cmdhist) + 1
+        if 0 < cmdhistcursor < length(cmdhist) + 1
           # print(cmdhist[cmdhistcursor])
           curstr *= cmdhist[cmdhistcursor]
           curcmd = cmdhist[cmdhistcursor]
