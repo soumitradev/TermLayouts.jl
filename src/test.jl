@@ -1,8 +1,14 @@
 using IOCapture
 
 include("core/core.jl")
+include("strings/parseANSI.jl")
 
 function test()
+  a = "\r\e[0K\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7C\e[?2004h\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7Ca = 1a = 1\r\e[0K\e[32mjulia> \e[0m\r\e[7Ca = 1\r\e[12C\n\e[?2004l\e[0m1\n\n\r\e[0K\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7C\e[?2004h\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7C "
+  print(parseANSI(a))
+end
+
+function testA()
   # Create pipes
   inputbuf = Pipe()
   outputbuf = Pipe()
