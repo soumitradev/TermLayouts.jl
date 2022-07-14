@@ -27,11 +27,19 @@ end
 function cursor_down(str::EditableString)
   if str.ycursor == 0
     return
-  elseif 0 < str.ycursor < len(str.strings)
-    str.ycursor += 1
-  elseif str.ycursor == len(str.strings)
-    str.ycursor += 1
-    str.strings = insert!(str.strings, str.ycursor, "")
+  elseif 0 < str.ycursor <= len(str.strings)
+
+    if 0 < str.ycursor < len(str.strings)
+      str.ycursor += 1
+    else
+      str.ycursor += 1
+      str.strings = insert!(str.strings, str.ycursor, "")
+    end
+
+    if str.xcursor > len(str.strings[str.ycursor]) + 1
+      str.strings[str.ycursor] = str.strings[str.ycursor] * (" "^(str.xcursor - len(str.strings[str.ycursor]) - 1))
+    end
+
   else
     throw(BoundsError(str.strings, str.ycursor))
   end
@@ -65,8 +73,8 @@ function cursor_up(str::EditableString)
     return
   elseif 1 < str.ycursor <= len(str.strings)
     str.ycursor -= 1
-    if str.xcursor > len(str.strings[str.ycursor])
-      str.xcursor = len(str.strings[str.ycursor]) + 1
+    if str.xcursor > len(str.strings[str.ycursor]) + 1
+      str.strings[str.ycursor] = str.strings[str.ycursor] * (" "^(str.xcursor - len(str.strings[str.ycursor]) - 1))
     end
   else
     throw(BoundsError(str.strings, str.ycursor))
