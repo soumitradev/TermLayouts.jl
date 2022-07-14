@@ -11,12 +11,12 @@ end
 
 function enterchar(str::EditableString, char::Char)
   if str.ycursor == 0
-    insert!(str.strings, 1, string(char))
+    str.strings = insert!(str.strings, 1, string(char))
     str.ycursor = 1
     str.xcursor = 2
   elseif 0 < str.ycursor <= len(str.strings)
     stringAtY = collect(str.strings[str.ycursor])
-    insert!(stringAtY, str.xcursor, char)
+    stringAtY = insert!(stringAtY, str.xcursor, char)
     str.strings[str.ycursor] = join(stringAtY)
     str.xcursor += 1
   else
@@ -31,7 +31,7 @@ function cursor_down(str::EditableString)
     str.ycursor += 1
   elseif str.ycursor == len(str.strings)
     str.ycursor += 1
-    insert!(str.strings, str.ycursor, "")
+    str.strings = insert!(str.strings, str.ycursor, "")
   else
     throw(BoundsError(str.strings, str.ycursor))
   end
@@ -124,7 +124,7 @@ function cursor_position(str::EditableString, x::Unsigned, y::Unsigned)
   elseif 0 < str.ycursor <= len(str.strings)
     str.ycursor = y
     if y > len(str.strings)
-      append!(str.strings, ["" for _ in len(str.strings):(y-1)])
+      str.strings = append!(str.strings, ["" for _ in len(str.strings):(y-1)])
     end
     cursor_horizontal_absolute(str, x)
   else
@@ -132,17 +132,78 @@ function cursor_position(str::EditableString, x::Unsigned, y::Unsigned)
   end
 end
 
-# TODO: Erase in Display, Erase in Line, Scroll Up, Scroll Down
+function erase_in_display(str::EditableString, n::Unsigned)
+  if str.ycursor == 0
+    return
+  elseif 0 < str.ycursor <= len(str.strings)
+    if n == 0
+      str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1] * (" "^((len(str.strings[str.ycursor]) + 1) - str.xcursor))
+      for i in str.ycursor+1:len(str.strings)
+        str.strings[i] = (" "^len(str.strings[i]))
+      end
+    elseif n == 1
+      str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1] * (" "^((len(str.strings[str.ycursor]) + 1) - str.xcursor))
+      for i in 1:str.ycursor-1
+        str.strings[i] = (" "^len(str.strings[i]))
+      end
+    elseif n == 2 || n == 3
+      for i in 1:len(str.strings)
+        str.strings[i] = (" "^len(str.strings[i]))
+      end
+    else
+      throw(ArgumentError("n can't be above 3"))
+    end
+  else
+    throw(BoundsError(str.strings, str.ycursor))
+  end
+end
+
+function erase_in_line(str::EditableString, n::Unsigned)
+  if str.ycursor == 0
+    return
+  elseif 0 < str.ycursor <= len(str.strings)
+    if n == 0
+      str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1] * (" "^((len(str.strings[str.ycursor]) + 1) - str.xcursor))
+    elseif n == 1
+      str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1] * (" "^((len(str.strings[str.ycursor]) + 1) - str.xcursor))
+    elseif n == 2
+      str.strings[str.ycursor] = (" "^len(str.strings[str.ycursor]))
+    else
+      throw(ArgumentError("n can't be above 3"))
+    end
+  else
+    throw(BoundsError(str.strings, str.ycursor))
+  end
+end
+
+function scroll_up(str::EditableString, n::Unsigned)
+  if str.ycursor == 0
+    return
+  elseif 0 < str.ycursor <= len(str.strings)
+    str.strings = append!(str.strings, ["" for _ in 1:n])
+  else
+    throw(BoundsError(str.strings, str.ycursor))
+  end
+end
+
+function scroll_down(str::EditableString, n::Unsigned)
+  if str.ycursor == 0
+    return
+  elseif 0 < str.ycursor <= len(str.strings)
+    str.strings = append!(["" for _ in 1:n], str.strings)
+  else
+    throw(BoundsError(str.strings, str.ycursor))
+  end
+end
 
 function newline(str::EditableString)
   if str.ycursor == 0
-    insert!(str.strings, 1, "")
-    insert!(str.strings, 2, "")
+    str.strings = append!([""^2], str.strings)
     str.ycursor += 2
     str.xcursor = 1
   elseif 0 < str.ycursor <= len(str.strings)
-    insert!(str.strings, str.ycursor + 1, str.strings[str.ycursor][str.xcursor:end])
-    str.strings[str.ycursor] = str.strings[str.ycursor][:str.xcursor-1]
+    str.strings = insert!(str.strings, str.ycursor + 1, str.strings[str.ycursor][str.xcursor:end])
+    str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1]
     str.ycursor += 1
     str.xcursor = 1
   else
