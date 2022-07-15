@@ -4,7 +4,7 @@ include("./strings.jl")
 # Color codes shouldnt be characters, they're many
 # We'll have to make colors not take up any chars in the str.strings
 function parseANSI(str::String)
-  console = EditableString([], 0, 0)
+  console = EditableString([], 0, 0, "\e[0m")
   cur = 1
   while cur <= length(str)
     if str[cur] == '\r'
@@ -77,6 +77,28 @@ function parseANSI(str::String)
         elseif str[cur] == 'T'
           scroll_down(console, number)
         elseif str[cur] == 'm'
+          entercolor(console, "\e[" * string(number) * "m")
+        elseif str[cur] == '?'
+          cur += 1
+          m = ""
+          while isdigit(str[cur])
+            m *= str[cur]
+            cur += 1
+          end
+          mumber = length(m) > 0 ? parse(Int, m) : 0
+          if str[cur] == 'l' || str[cur] == 'h'
+          else
+            enterchar(console, '\e')
+            enterchar(console, '[')
+            for c in n
+              enterchar(console, c)
+            end
+            enterchar(console, '?')
+            for d in m
+              enterchar(console, d)
+            end
+            enterchar(console, str[cur])
+          end
         else
           enterchar(console, '\e')
           enterchar(console, '[')
