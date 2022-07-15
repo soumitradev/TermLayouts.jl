@@ -1,14 +1,7 @@
-using IOCapture
-
 include("core/core.jl")
 include("strings/parseANSI.jl")
 
 function test()
-  a = "\r\e[0K\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7C\e[?2004h\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7Ca = 1a = 1\r\e[0K\e[32mjulia> \e[0m\r\e[7Ca = 1\r\e[12C\n\e[?2004l\e[0m1\n\n\r\e[0K\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7C\e[?2004h\r\e[0K\e[32mjulia> \e[0m\r\e[7C\r\e[7C "
-  print(parseANSI(a))
-end
-
-function testA()
   # Create pipes
   inputbuf = Pipe()
   outputbuf = Pipe()
@@ -47,11 +40,8 @@ function testA()
     write(inputbuf.in, cmd)
     sleep(0.3)
     current_prompt = split(String(readavailable(outputbuf.out)), '\n')
-    current_prompt = current_prompt[length(current_prompt)]
-    promptout = IOCapture.capture() do
-      print(current_prompt)
-    end
-    current_prompt = promptout.output
+    current_prompt = string(current_prompt[length(current_prompt)])
+    current_prompt = parseANSI(current_prompt)
   end
   println("finished setup cmds")
 
@@ -68,7 +58,7 @@ function testA()
 
   while !should_exit
     # Clear screen
-    print("\e[2J")
+    print("\e[3J")
     # Create panels and give them default sizes
     fullh = Int(round(Term.consoles.console_height()))
     fullw = Int(round(Term.consoles.console_width()))
@@ -86,12 +76,12 @@ function testA()
       style="blue"
     )
     top = lpanel * rpanel
-    # print(Term.Panel(
-    #   top,
-    #   width=fullw,
-    #   height=fullh - 1,
-    # ))
-    print(replstr)
+    print(Term.Panel(
+      top,
+      width=fullw,
+      height=fullh - 1,
+    ))
+    # print(replstr)
     # sleep(1 / 15) # 10ms should be enough for most keyboard event
 
     # Read in keys
@@ -108,10 +98,7 @@ function testA()
       write(inputbuf.in, "__TERMLAYOUTS__term_end(1)\n")
       sleep(0.2)
       outarr = split(String(readuntil(outputbuf.out, "\"__TERMLAYOUTS__TERM_END_1\"\n")), '\n')
-      ioout = IOCapture.capture() do
-        print(join(outarr[1:length(outarr)-2], "\n"))
-      end
-      outstr = ioout.output
+      outstr = parseANSI(join(outarr[1:length(outarr)-2], "\n"))
       if LAST_CMD_WAS_ERR[]
         # Stray newline for printing errors properly
         # println()

@@ -235,6 +235,7 @@ function to_string(str::EditableString)
     for char in line
       if char.color != color
         builtstring *= char.color
+        color = char.color
       end
       builtstring *= string(char.char)
     end
