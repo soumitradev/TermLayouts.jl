@@ -17,19 +17,15 @@ function read_key(io=stdin)
         if keyin == 'A'
           control_value = '\e' * '[' * 'A'
         elseif keyin == 'D'
-          control_value = :ARROW_LEFT
+          control_value = :'\e' * '[' * 'D'
         elseif keyin == 'B'
           control_value = '\e' * '[' * 'B'
         elseif keyin == 'C'
-          control_value = :ARROW_RIGHT
+          control_value = :'\e' * '[' * 'C'
         end
       end
-    elseif keyin == '\r'
-      control_value = :ENTER
     elseif keyin == '\x03'
       control_value = :EXIT
-    elseif keyin == '\x08'
-      control_value = :BACKSPACE
     else
       control_value = keyin
     end

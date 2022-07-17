@@ -1,9 +1,7 @@
 include("./strings.jl")
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code
-# Color codes shouldnt be characters, they're many
-# We'll have to make colors not take up any chars in the str.strings
-function parseANSI(str::String)
+function simplifyANSI(str::String)
   console = EditableString([], 0, 0, "\e[0m")
   cur = 1
   while cur <= length(str)
