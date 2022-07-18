@@ -28,8 +28,8 @@ function test()
   end
 
   # Run setup commands, and get the current prompt string
-  current_prompt = ""
-  current_prompt = string(strip(readavailable(outputbuf.out)))
+  sleep(1)
+  current_prompt = string(strip(simplifyANSI(String(readavailable(outputbuf.out)))))
 
   # Setup some variables that describe the state of the REPL
   should_exit = false
