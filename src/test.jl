@@ -45,8 +45,8 @@ function test()
     # Clear screen
     print("\e[3J")
     # Create panels and give them default sizes
-    fullh = Int(round(Term.consoles.console_height()))
-    fullw = Int(round(Term.consoles.console_width()))
+    fullh = Int(round(Term.Consoles.console_height()))
+    fullw = Int(round(Term.Consoles.console_width()))
     lpanelw = Int(round(fullw * 2 / 3))
     lpanel = Term.Panel(
       replstr,
