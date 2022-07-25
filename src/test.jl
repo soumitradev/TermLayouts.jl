@@ -19,17 +19,35 @@ function test()
 
   # Start REPL
   println("starting REPL...")
-  hook_repl(repl)
-  start_eval_backend()
-  println("finished starting REPL")
+
+  # Even if I disconnect any code that's interfering with the REPL, it still does the same thing
+  # hook_repl(repl)
+  # start_eval_backend()
 
   repltask = @async begin
     REPL.run_repl(repl)
   end
 
+  println("finished starting REPL")
+
+
   # Run setup commands, and get the current prompt string
   sleep(1)
   current_prompt = string(strip(simplifyANSI(String(readavailable(outputbuf.out)))))
+
+  # Try running commands and test REPL redirection
+  setup_commands = [
+    "__TERMLAYOUTS__term_end(x) = \"__TERMLAYOUTS__TERM_END_\" * string(x)\n",
+    "__TERMLAYOUTS__IO = open(\"test.txt\", \"w\"); redirect_stdout(__TERMLAYOUTS__IO)\n",
+  ]
+
+  println("running setup cmds")
+  for cmd in setup_commands
+    write(inputbuf.in, cmd)
+    sleep(1)
+    _ = readavailable(outputbuf.out)
+  end
+  println("finished setup cmds")
 
   # Setup some variables that describe the state of the REPL
   should_exit = false
