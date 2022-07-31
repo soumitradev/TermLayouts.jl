@@ -1,5 +1,6 @@
 include("core/core.jl")
 include("strings/parseANSI.jl")
+include("customio/customio.jl")
 
 function test()
   # Create pipes
@@ -11,6 +12,11 @@ function test()
   Base.link_pipe!(outputbuf, reader_supports_async=true, writer_supports_async=true)
   Base.link_pipe!(errbuf, reader_supports_async=true, writer_supports_async=true)
 
+  diffinputbuf = Pipe()
+  diffoutputbuf = Pipe()
+  differrbuf = Pipe()
+  idk = CustomIO(diffinputbuf, diffoutputbuf, differrbuf)
+
   # Link pipes to REPL
   term = REPL.Terminals.TTYTerminal("dumb", inputbuf.out, outputbuf.in, errbuf.in)
   repl = REPL.LineEditREPL(term, true)
@@ -18,7 +24,9 @@ function test()
   repl.history_file = false
 
   # Start REPL
-  println("starting REPL...")
+  print("starting REPL...")
+
+  redirect_stdout(idk)
 
   # Even if I disconnect any code that's interfering with the REPL, it still does the same thing
   # hook_repl(repl)
@@ -28,26 +36,9 @@ function test()
     REPL.run_repl(repl)
   end
 
-  println("finished starting REPL")
-
-
   # Run setup commands, and get the current prompt string
   sleep(1)
   current_prompt = string(strip(simplifyANSI(String(readavailable(outputbuf.out)))))
-
-  # Try running commands and test REPL redirection
-  setup_commands = [
-    "__TERMLAYOUTS__term_end(x) = \"__TERMLAYOUTS__TERM_END_\" * string(x)\n",
-    "__TERMLAYOUTS__IO = open(\"test.txt\", \"w\"); redirect_stdout(__TERMLAYOUTS__IO)\n",
-  ]
-
-  println("running setup cmds")
-  for cmd in setup_commands
-    write(inputbuf.in, cmd)
-    sleep(1)
-    _ = readavailable(outputbuf.out)
-  end
-  println("finished setup cmds")
 
   # Setup some variables that describe the state of the REPL
   should_exit = false
@@ -80,11 +71,11 @@ function test()
     top = lpanel * rpanel
 
     # Print the panel
-    print(Term.Panel(
+    Base.write(idk, string(Term.Panel(
       top,
       width=fullw,
       height=fullh - 1,
-    ))
+    )))
 
     # Read in keys
     control_value = :CONTROL_VOID
@@ -95,7 +86,7 @@ function test()
       should_exit = true
     else
       # Pass down keys to the REPL
-      write(inputbuf.in, control_value)
+      Base.write(inputbuf.in, control_value)
       sleep(0.2)
       # Read the output, and process it relative to the current state of the console
       outarr = String(readavailable(outputbuf.out))
