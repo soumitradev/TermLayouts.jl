@@ -1,6 +1,5 @@
 include("core/core.jl")
 include("strings/parseANSI.jl")
-include("customio/customio.jl")
 
 function test()
   # Create pipes
@@ -12,10 +11,8 @@ function test()
   Base.link_pipe!(outputbuf, reader_supports_async=true, writer_supports_async=true)
   Base.link_pipe!(errbuf, reader_supports_async=true, writer_supports_async=true)
 
-  diffinputbuf = Pipe()
-  diffoutputbuf = Pipe()
-  differrbuf = Pipe()
-  idk = CustomIO(diffinputbuf, diffoutputbuf, differrbuf)
+  fakestdout = stdout
+  redirect_stdout(outputbuf.in)
 
   # Link pipes to REPL
   term = REPL.Terminals.TTYTerminal("dumb", inputbuf.out, outputbuf.in, errbuf.in)
@@ -26,7 +23,6 @@ function test()
   # Start REPL
   print("starting REPL...")
 
-  redirect_stdout(idk)
 
   # Even if I disconnect any code that's interfering with the REPL, it still does the same thing
   # hook_repl(repl)
@@ -52,7 +48,7 @@ function test()
 
   while !should_exit
     # Clear screen
-    print("\e[3J")
+    Base.write(fakestdout, "\e[3J")
     # Create panels and give them default sizes
     fullh = Int(round(Term.Consoles.console_height()))
     fullw = Int(round(Term.Consoles.console_width()))
@@ -71,7 +67,7 @@ function test()
     top = lpanel * rpanel
 
     # Print the panel
-    Base.write(idk, string(Term.Panel(
+    Base.write(fakestdout, string(Term.Panel(
       top,
       width=fullw,
       height=fullh - 1,
