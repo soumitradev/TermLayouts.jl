@@ -49,29 +49,32 @@ function test()
   while !should_exit
     # Clear screen
     print(true_stdout, "\e[3J")
+
     # Create panels and give them default sizes
-    fullh = Int(round(Term.Consoles.console_height()))
-    fullw = Int(round(Term.Consoles.console_width()))
+    fullh, fullw = displaysize(true_stdout)
     lpanelw = Int(round(fullw * 2 / 3))
+
+    # Create panels
     lpanel = Term.Panel(
       replstr,
-      width=lpanelw - 4,
-      height=fullh - 3,
+      width=lpanelw,
+      height=fullh - 1,
       style="red"
     )
     rpanel = Term.Panel(
-      width=fullw - lpanelw - 2,
-      height=fullh - 3,
+      width=fullw - lpanelw,
+      height=fullh - 1,
       style="blue"
     )
     top = lpanel * rpanel
 
-    # Print the panel
-    print(true_stdout, string(Term.Panel(
-      top,
-      width=fullw,
-      height=fullh - 1,
-    )))
+    # # Print the panel
+    # print(true_stdout, string(Term.Panel(
+    #   top,
+    #   width=fullw - 1,
+    #   height=fullh - 2,
+    # )))
+    print(true_stdout, top)
 
     # Read in keys
     control_value = :CONTROL_VOID
