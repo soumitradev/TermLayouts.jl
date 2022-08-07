@@ -1,6 +1,7 @@
 mutable struct ColoredChar
   char::Char
   color::String
+  empty::Bool
 end
 
 mutable struct EditableString
@@ -12,11 +13,12 @@ end
 
 function enterchar(str::EditableString, char::Char)
   if str.ycursor == 0
-    str.strings = insert!(str.strings, 1, [ColoredChar(char, str.current_color)])
+    str.strings = insert!(str.strings, 1, [ColoredChar(char, str.current_color, false)])
     str.ycursor = 1
     str.xcursor = 2
   elseif 0 < str.ycursor <= length(str.strings)
-    str.strings[str.ycursor] = insert!(str.strings[str.ycursor], str.xcursor, ColoredChar(char, str.current_color))
+    map(x -> x.empty = false, str.strings[str.ycursor][1:str.xcursor-1])
+    str.strings[str.ycursor] = insert!(str.strings[str.ycursor], str.xcursor, ColoredChar(char, str.current_color, false))
     str.xcursor += 1
   else
     throw(BoundsError(str.strings, str.ycursor))
@@ -42,7 +44,7 @@ function cursor_down(str::EditableString)
       str.strings = insert!(str.strings, str.ycursor, [])
     end
     if str.xcursor > length(str.strings[str.ycursor]) + 1
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor], [ColoredChar(' ', str.current_color) for _ in 1:(str.xcursor-length(str.strings[str.ycursor])-1)])
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor], [ColoredChar(' ', str.current_color, true) for _ in 1:(str.xcursor-length(str.strings[str.ycursor])-1)])
     end
   else
     throw(BoundsError(str.strings, str.ycursor))
@@ -65,7 +67,7 @@ function cursor_right(str::EditableString)
   elseif 0 < str.xcursor < length(str.strings[str.ycursor]) + 1
     str.xcursor += 1
   elseif str.xcursor == length(str.strings[str.ycursor]) + 1
-    push!(str.strings[str.ycursor], ColoredChar(' ', str.current_color))
+    push!(str.strings[str.ycursor], ColoredChar(' ', str.current_color, true))
     str.xcursor += 1
   else
     throw(BoundsError(str.strings[str.ycursor], str.xcursor))
@@ -78,7 +80,7 @@ function cursor_up(str::EditableString)
   elseif 1 < str.ycursor <= length(str.strings)
     str.ycursor -= 1
     if str.xcursor > length(str.strings[str.ycursor]) + 1
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor], [ColoredChar(' ', str.current_color) for _ in 1:(str.xcursor-length(str.strings[str.ycursor])-1)])
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor], [ColoredChar(' ', str.current_color, true) for _ in 1:(str.xcursor-length(str.strings[str.ycursor])-1)])
     end
   else
     throw(BoundsError(str.strings, str.ycursor))
@@ -123,7 +125,7 @@ function cursor_horizontal_absolute(str::EditableString, x::Int)
   elseif 0 < str.ycursor <= length(str.strings)
     str.xcursor = x
     if x > length(str.strings[str.ycursor]) + 1
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor], [ColoredChar(' ', str.current_color) for _ in 1:(x-(length(str.strings[str.ycursor])+1))])
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor], [ColoredChar(' ', str.current_color, true) for _ in 1:(x-(length(str.strings[str.ycursor])+1))])
     end
   else
     throw(BoundsError(str.strings, str.ycursor))
@@ -149,18 +151,18 @@ function erase_in_display(str::EditableString, n::Int)
     return
   elseif 0 < str.ycursor <= length(str.strings)
     if n == 0
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color) for i in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for i in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
       for i in str.ycursor+1:length(str.strings)
-        str.strings[i] = [ColoredChar(' ', str.current_color) for _ in 1:length(str.strings[i])]
+        str.strings[i] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[i])]
       end
     elseif n == 1
       str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1] * (' '^((length(str.strings[str.ycursor]) + 1) - str.xcursor))
       for i in 1:str.ycursor-1
-        str.strings[i] = [ColoredChar(' ', str.current_color) for _ in 1:length(str.strings[i])]
+        str.strings[i] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[i])]
       end
     elseif n == 2 || n == 3
       for i in 1:length(str.strings)
-        str.strings[i] = [ColoredChar(' ', str.current_color) for _ in 1:length(str.strings[i])]
+        str.strings[i] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[i])]
       end
     else
       throw(ArgumentError("n can't be above 3"))
@@ -175,11 +177,11 @@ function erase_in_line(str::EditableString, n::Int)
     return
   elseif 0 < str.ycursor <= length(str.strings)
     if n == 0
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
     elseif n == 1
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
     elseif n == 2
-      str.strings[str.ycursor] = [ColoredChar(' ', str.current_color) for _ in 1:length(str.strings[str.ycursor])]
+      str.strings[str.ycursor] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[str.ycursor])]
     else
       throw(ArgumentError("n can't be above 3"))
     end
@@ -225,14 +227,11 @@ end
 
 function to_string(str::EditableString)
   builtstring = ""
-  color = ""
   for line in str.strings
     for char in line
-      if char.color != color
-        builtstring *= char.color
-        color = char.color
+      if !char.empty
+        builtstring *= char.color * string(char.char) * "\e[0m"
       end
-      builtstring *= string(char.char)
     end
     builtstring *= "\n"
   end
