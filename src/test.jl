@@ -3,28 +3,25 @@ include("strings/parseANSI.jl")
 
 function test()
   # Create pipes
-  inputbuf = Pipe()
-  outputbuf = Pipe()
-  errbuf = Pipe()
+  inputpipe = Pipe()
+  outputpipe = Pipe()
+  errpipe = Pipe()
 
-  Base.link_pipe!(inputbuf, reader_supports_async=true, writer_supports_async=true)
-  Base.link_pipe!(outputbuf, reader_supports_async=true, writer_supports_async=true)
-  Base.link_pipe!(errbuf, reader_supports_async=true, writer_supports_async=true)
+  Base.link_pipe!(inputpipe, reader_supports_async=true, writer_supports_async=true)
+  Base.link_pipe!(outputpipe, reader_supports_async=true, writer_supports_async=true)
+  Base.link_pipe!(errpipe, reader_supports_async=true, writer_supports_async=true)
 
-  fakestdout = stdout
-  redirect_stdout(outputbuf.in)
+  true_stdout = stdout
+  redirect_stdout(outputpipe.in)
 
   # Link pipes to REPL
-  term = REPL.Terminals.TTYTerminal("dumb", inputbuf.out, outputbuf.in, errbuf.in)
+  term = REPL.Terminals.TTYTerminal("dumb", inputpipe.out, outputpipe.in, errpipe.in)
   repl = REPL.LineEditREPL(term, true)
   repl.specialdisplay = REPL.REPLDisplay(repl)
   repl.history_file = false
 
   # Start REPL
-  print("starting REPL...")
-
-
-  # Even if I disconnect any code that's interfering with the REPL, it still does the same thing
+  print(true_stdout, "starting REPL...")
   # hook_repl(repl)
   # start_eval_backend()
 
@@ -32,23 +29,26 @@ function test()
     REPL.run_repl(repl)
   end
 
-  # Run setup commands, and get the current prompt string
-  sleep(1)
-  current_prompt = string(strip(simplifyANSI(String(readavailable(outputbuf.out)))))
-
   # Setup some variables that describe the state of the REPL
   should_exit = false
   keyboard_io = stdin
   replstr = ""
-  replstr *= current_prompt
 
   # Create a console-like object that will make it easier to parse ANSI commands
-  curcons = EditableString([], 0, 0, "\e[0m")
-  parseANSI(curcons, current_prompt)
+  virtual_console = EditableString([], 0, 0, "\e[0m")
+
+  # Read output from REPL and process it asynchronously
+  @async while !eof(outputpipe)
+    data = String(readavailable(outputpipe))
+
+    # Read the output, and process it relative to the current state of the console
+    parseANSI(virtual_console, data)
+    sleep(1e-2)
+  end
 
   while !should_exit
     # Clear screen
-    Base.write(fakestdout, "\e[3J")
+    print(true_stdout, "\e[3J")
     # Create panels and give them default sizes
     fullh = Int(round(Term.Consoles.console_height()))
     fullw = Int(round(Term.Consoles.console_width()))
@@ -67,7 +67,7 @@ function test()
     top = lpanel * rpanel
 
     # Print the panel
-    Base.write(fakestdout, string(Term.Panel(
+    print(true_stdout, string(Term.Panel(
       top,
       width=fullw,
       height=fullh - 1,
@@ -82,25 +82,22 @@ function test()
       should_exit = true
     else
       # Pass down keys to the REPL
-      Base.write(inputbuf.in, control_value)
+      Base.write(inputpipe.in, control_value)
       sleep(0.2)
-      # Read the output, and process it relative to the current state of the console
-      outarr = String(readavailable(outputbuf.out))
-      parseANSI(curcons, outarr)
 
       # Grab the string that describes the current state of the fake console, and set the panel's text to it
-      outstr = to_string(curcons)
+      outstr = to_string(virtual_console)
       replstr = outstr
     end
   end
 
   # Delete line (^U) and close REPL (^D)
-  write(inputbuf.in, "\x15\x04")
+  write(inputpipe.in, "\x15\x04")
   Base.wait(repltask)
   t = @async begin
-    close(inputbuf.in)
-    close(outputbuf.in)
-    close(errbuf.in)
+    close(inputpipe.in)
+    close(outputpipe.in)
+    close(errpipe.in)
   end
   Base.wait(t)
 end
