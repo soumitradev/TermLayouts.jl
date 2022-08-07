@@ -46,13 +46,21 @@ function test()
     sleep(1e-2)
   end
 
-  while !should_exit
+  # Render the layout asynchronously
+  @async while !should_exit
     # Clear screen
     print(true_stdout, "\e[3J")
 
     # Create panels and give them default sizes
     fullh, fullw = displaysize(true_stdout)
     lpanelw = Int(round(fullw * 2 / 3))
+
+    # Grab the string that describes the current state of the fake console, and set the panel's text to it
+    outstr = to_string(virtual_console)
+    outstr = Term.reshape_text(outstr, Int(round(fullw * 2 / 3)) - 3)
+    outstr = split(outstr, "\n")
+    outstr = join(outstr[max(1, length(outstr) - fullh + 4):end], "\n")
+    replstr = outstr
 
     # Create panels
     lpanel = Term.Panel(
@@ -68,6 +76,7 @@ function test()
     )
     top = lpanel * rpanel
 
+
     # # Print the panel
     # print(true_stdout, string(Term.Panel(
     #   top,
@@ -75,7 +84,10 @@ function test()
     #   height=fullh - 2,
     # )))
     print(true_stdout, top)
+    sleep(1 / 30)
+  end
 
+  while !should_exit
     # Read in keys
     control_value = :CONTROL_VOID
     control_value = read_key(keyboard_io)
@@ -86,12 +98,8 @@ function test()
     else
       # Pass down keys to the REPL
       Base.write(inputpipe.in, control_value)
-      sleep(0.2)
-
-      # Grab the string that describes the current state of the fake console, and set the panel's text to it
-      outstr = to_string(virtual_console)
-      replstr = outstr
     end
+    sleep(1e-2)
   end
 
   # Delete line (^U) and close REPL (^D)
