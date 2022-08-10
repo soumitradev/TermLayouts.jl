@@ -1,7 +1,7 @@
 include("./strings.jl")
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code
-function simplifyANSI(str::String)
+function simplifyANSI(str::String, color_enabled::Bool)
   console = EditableString([], 0, 0, "\e[0m")
   cur = 1
   while cur <= length(str)
@@ -113,5 +113,5 @@ function simplifyANSI(str::String)
     end
     cur += 1
   end
-  return to_string(console)
+  return to_string(console, color_enabled)
 end

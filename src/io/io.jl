@@ -17,11 +17,11 @@ function read_key(io=stdin)
         if keyin == 'A'
           control_value = '\e' * '[' * 'A'
         elseif keyin == 'D'
-          control_value = :'\e' * '[' * 'D'
+          control_value = '\e' * '[' * 'D'
         elseif keyin == 'B'
           control_value = '\e' * '[' * 'B'
         elseif keyin == 'C'
-          control_value = :'\e' * '[' * 'C'
+          control_value = '\e' * '[' * 'C'
         end
       end
     elseif keyin == '\x03'

@@ -225,12 +225,16 @@ function newline(str::EditableString)
   end
 end
 
-function to_string(str::EditableString)
+function to_string(str::EditableString, color_enabled::Bool)
   builtstring = ""
   for line in str.strings
     for char in line
       if !char.empty
-        builtstring *= char.color * string(char.char) * "\e[0m"
+        if color_enabled
+          builtstring *= char.color * string(char.char) * "\e[0m"
+        else
+          builtstring *= string(char.char)
+        end
       end
     end
     builtstring *= "\n"
@@ -238,7 +242,7 @@ function to_string(str::EditableString)
   return builtstring
 end
 
-function parseANSI(console::EditableString, str::String)
+function parseANSI(console::EditableString, str::String, color_enabled::Bool)
   cur = 1
   while cur <= length(str)
     if str[cur] == '\r'
@@ -349,5 +353,5 @@ function parseANSI(console::EditableString, str::String)
     end
     cur += 1
   end
-  return to_string(console)
+  return to_string(console, color_enabled)
 end

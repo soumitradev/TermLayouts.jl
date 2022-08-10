@@ -42,48 +42,62 @@ function test()
     data = String(readavailable(outputpipe))
 
     # Read the output, and process it relative to the current state of the console
-    parseANSI(virtual_console, data)
+    parseANSI(virtual_console, data, true)
     sleep(1e-2)
   end
 
   # Render the layout asynchronously
   @async while !should_exit
-    # Clear screen
-    print(true_stdout, "\e[3J")
-
     # Create panels and give them default sizes
     fullh, fullw = displaysize(true_stdout)
     lpanelw = Int(round(fullw * 2 / 3))
 
     # Grab the string that describes the current state of the fake console, and set the panel's text to it
-    outstr = to_string(virtual_console)
-    outstr = Term.reshape_text(outstr, Int(round(fullw * 2 / 3)) - 3)
-    outstr = split(outstr, "\n")
-    outstr = join(outstr[max(1, length(outstr) - fullh + 4):end], "\n")
-    replstr = outstr
+    outstr = to_string(virtual_console, true)
+    # Reshape text
+    reshaped = Term.reshape_text(outstr, lpanelw - 3)
+    # Get last few lines
+    reshaped_lines = split(reshaped, "\n")
+    reshaped_cropped = reshaped_lines[max(1, length(reshaped_lines) - fullh + 3):end]
+
+    last_line = string(reshaped_cropped[max(1, length(reshaped_cropped) - 1)])
+
+    text_before_cursor = simplifyANSI(last_line, false)
+    # TODO: Allow cursor to move around after
+    cursorX = length(text_before_cursor) + 3
+    cursorY = length(reshaped_cropped)
+
+    final_outstr = join(reshaped_cropped, "\n")
+    replstr = final_outstr
 
     # Create panels
     lpanel = Term.Panel(
       replstr,
       width=lpanelw,
-      height=fullh - 1,
+      height=fullh,
       style="red"
     )
     rpanel = Term.Panel(
       width=fullw - lpanelw,
-      height=fullh - 1,
+      height=fullh,
       style="blue"
     )
     top = lpanel * rpanel
 
 
-    # # Print the panel
+    # Clear screen and print the panel
     # print(true_stdout, string(Term.Panel(
     #   top,
     #   width=fullw - 1,
     #   height=fullh - 2,
     # )))
-    print(true_stdout, top)
+    # print(true_stdout, "\e[2J")
+    print(true_stdout, "\e[3J")
+    print(true_stdout, "\e[1;1H")
+    print(true_stdout, string(top))
+
+    print(true_stdout, "\e[" * string(cursorY) * ";" * string(cursorX) * "H")
+
     sleep(1 / 30)
   end
 
@@ -97,13 +111,18 @@ function test()
       should_exit = true
     else
       # Pass down keys to the REPL
-      Base.write(inputpipe.in, control_value)
+      write(inputpipe.in, control_value)
     end
     sleep(1e-2)
   end
 
   # Delete line (^U) and close REPL (^D)
   write(inputpipe.in, "\x15\x04")
+
+  print(true_stdout, "\e[2J")
+  print(true_stdout, "\e[3J")
+  print(true_stdout, "\e[1;1H")
+
   Base.wait(repltask)
   t = @async begin
     close(inputpipe.in)
