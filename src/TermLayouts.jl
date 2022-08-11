@@ -1,7 +1,11 @@
+module TermLayouts
+
+using Preferences
+
 include("core/core.jl")
 include("strings/parseANSI.jl")
 
-function test()
+function activate()
   # Create pipes
   inputpipe = Pipe()
   outputpipe = Pipe()
@@ -22,8 +26,8 @@ function test()
 
   # Start REPL
   print(true_stdout, "starting REPL...")
-  # hook_repl(repl)
-  # start_eval_backend()
+  hook_repl(repl)
+  start_eval_backend()
 
   repltask = @async begin
     REPL.run_repl(repl)
@@ -132,4 +136,4 @@ function test()
   Base.wait(t)
 end
 
-test()
+end
