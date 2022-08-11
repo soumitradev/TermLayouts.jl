@@ -5,6 +5,12 @@ using Preferences
 include("core/core.jl")
 include("strings/parseANSI.jl")
 
+export activate, set_pref
+
+function set_pref()
+  @set_preferences!("test" => "test_ok")
+end
+
 function activate()
   # Create pipes
   inputpipe = Pipe()
