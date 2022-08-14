@@ -4,14 +4,35 @@ using Preferences
 
 include("core/core.jl")
 include("strings/parseANSI.jl")
+include("config/config.jl")
 
-export activate, set_pref
+export activate
 
-function set_pref()
-  @set_preferences!("test" => "test_ok")
+function loadprefs()
+  panelL_width = @load_preference("panelL_width", 70)
+  panelL_title = @load_preference("panelL_title", Nothing)
+  panelL_title_color = @load_preference("panelL_title_color", Nothing)
+  panelL_border_color = @load_preference("panelL_border_color", "red")
+
+  panelR_width = @load_preference("panelR_width", 30)
+  panelR_title = @load_preference("panelR_title", Nothing)
+  panelR_title_color = @load_preference("panelR_title_color", Nothing)
+  panelR_border_color = @load_preference("panelR_border_color", "blue")
+
+  if (panelL_width + panelR_width) > 100
+    @warn "Panel widths add up to more than 100, cropping right panel."
+    panelR_width = 100 - panelL_width
+  end
+
+  panelL_prefs = PanelPrefs(panelL_width, panelL_title, panelL_title_color, panelL_border_color)
+  panelR_prefs = PanelPrefs(panelR_width, panelR_title, panelR_title_color, panelR_border_color)
+
+  return TermLayoutPreferences(panelL_prefs, panelR_prefs)
 end
 
 function activate()
+  prefs = loadprefs()
+
   # Create pipes
   inputpipe = Pipe()
   outputpipe = Pipe()
@@ -60,7 +81,8 @@ function activate()
   @async while !should_exit
     # Create panels and give them default sizes
     fullh, fullw = displaysize(true_stdout)
-    lpanelw = Int(round(fullw * 2 / 3))
+    lpanelw = Int(round(fullw * prefs.panel1.width / 100))
+    rpanelw = Int(round(fullw * prefs.panel2.width / 100))
 
     # Grab the string that describes the current state of the fake console, and set the panel's text to it
     outstr = to_string(virtual_console, true)
@@ -88,7 +110,7 @@ function activate()
       style="red"
     )
     rpanel = Term.Panel(
-      width=fullw - lpanelw,
+      width=rpanelw,
       height=fullh,
       style="blue"
     )
