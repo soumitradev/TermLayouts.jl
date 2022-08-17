@@ -2,7 +2,7 @@ mutable struct PanelPrefs
   width::Integer
   title::Union{String,Nothing}
   title_color::Union{String,Nothing}
-  border_color::Union{String,Nothing}
+  border_color::String
 end
 
 mutable struct TermLayoutPreferences
