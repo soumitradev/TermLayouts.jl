@@ -10,13 +10,13 @@ export activate
 
 function loadprefs()
   panelL_width = @load_preference("panelL_width", 70)
-  panelL_title = @load_preference("panelL_title", Nothing)
-  panelL_title_color = @load_preference("panelL_title_color", Nothing)
+  panelL_title = @load_preference("panelL_title", "")
+  panelL_title_color = @load_preference("panelL_title_color", "")
   panelL_border_color = @load_preference("panelL_border_color", "red")
 
   panelR_width = @load_preference("panelR_width", 30)
-  panelR_title = @load_preference("panelR_title", Nothing)
-  panelR_title_color = @load_preference("panelR_title_color", Nothing)
+  panelR_title = @load_preference("panelR_title", "")
+  panelR_title_color = @load_preference("panelR_title_color", "")
   panelR_border_color = @load_preference("panelR_border_color", "blue")
 
   if (panelL_width + panelR_width) > 100

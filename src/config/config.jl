@@ -1,7 +1,7 @@
 mutable struct PanelPrefs
   width::Integer
-  title::Union{String,Nothing}
-  title_color::Union{String,Nothing}
+  title::String
+  title_color::String
   border_color::String
 end
 
