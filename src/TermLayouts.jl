@@ -56,6 +56,10 @@ function activate()
   hook_repl(repl)
   start_eval_backend()
 
+  # Clear screen before proceeding
+  print(true_stdout, "\e[3J")
+  print(true_stdout, "\e[1;1H")
+
   repltask = @async begin
     REPL.run_repl(repl)
   end
