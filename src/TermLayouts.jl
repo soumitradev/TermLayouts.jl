@@ -9,7 +9,7 @@ include("io.jl")
 include("errors.jl")
 include("strings.jl")
 
-export activate
+export run
 
 function loadprefs()
   panelL_width = @load_preference("panelL_width", 70)
@@ -33,8 +33,13 @@ function loadprefs()
   return TermLayoutPreferences(panelL_prefs, panelR_prefs)
 end
 
-function activate()
+function initializeState()::TermLayoutPreferences
+  return TermLayoutState()
+end
+
+function run()
   prefs = loadprefs()
+  state = initializeState()
 
   # Create pipes
   inputpipe = Pipe()
@@ -56,8 +61,8 @@ function activate()
 
   # Start REPL
   print(true_stdout, "starting REPL...")
-  hook_repl(repl)
-  start_eval_backend()
+  hook_repl(repl, state)
+  start_eval_backend(state)
 
   # Clear screen before proceeding
   # Still doesn't work on windows for some reason
