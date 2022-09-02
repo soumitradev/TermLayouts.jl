@@ -33,7 +33,7 @@ function loadprefs()
   return TermLayoutPreferences(panelL_prefs, panelR_prefs)
 end
 
-function initializeState()::TermLayoutPreferences
+function initializeState()::TermLayoutState
   return TermLayoutState()
 end
 
