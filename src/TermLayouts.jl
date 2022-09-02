@@ -2,9 +2,12 @@ module TermLayouts
 
 using Preferences
 
-include("core/core.jl")
-include("strings/parseANSI.jl")
-include("config/config.jl")
+include("core.jl")
+include("parseANSI.jl")
+include("config.jl")
+include("io.jl")
+include("errors.jl")
+include("strings.jl")
 
 export activate
 
@@ -57,6 +60,7 @@ function activate()
   start_eval_backend()
 
   # Clear screen before proceeding
+  # Still doesn't work on windows for some reason
   print(true_stdout, "\e[3J")
   print(true_stdout, "\e[1;1H")
 

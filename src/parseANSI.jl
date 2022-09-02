@@ -1,5 +1,3 @@
-include("./strings.jl")
-
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 function simplifyANSI(str::String, color_enabled::Bool)
   console = EditableString([], 0, 0, "\e[0m")
