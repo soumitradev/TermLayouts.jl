@@ -13,8 +13,6 @@ mutable struct TermLayoutState
   TermLayoutState() = new(Channel(0), Channel(0), nothing, false, false, false)
 end
 
-# TODO: MOve from Refs to this struct meme
-
 # Workaround for https://github.com/julia-vscode/julia-vscode/issues/1940
 struct Wrapper
   content::Any
@@ -40,7 +38,7 @@ function hook_repl(repl::REPL.LineEditREPL, state::TermLayoutState)
       sleep(0.5)
     end
     if isdefined(Base, :active_repl_backend)
-      push!(Base.active_repl_backend.ast_transforms, ast -> transform_backend(ast, repl, main_mode))
+      push!(Base.active_repl_backend.ast_transforms, ast -> transform_backend(ast, repl, main_mode, state))
       state.HAS_REPL_TRANSFORM = true
       @debug "REPL AST transform installed"
       return
@@ -57,9 +55,9 @@ function hook_repl(repl::REPL.LineEditREPL, state::TermLayoutState)
   return nothing
 end
 
-function transform_backend(ast, repl, main_mode)
+function transform_backend(ast, repl, main_mode, state)
   quote
-    $(evalrepl)(Main, $(QuoteNode(ast)), $repl, $main_mode)
+    $(evalrepl)(Main, $(QuoteNode(ast)), $repl, $main_mode, $state)
   end
 end
 
