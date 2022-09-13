@@ -1,5 +1,5 @@
 # TermLayouts.jl Documentation
 
 ```@docs
-run()
+TermLayouts.run()
 ```
