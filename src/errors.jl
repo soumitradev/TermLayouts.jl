@@ -7,11 +7,13 @@ struct EvalErrorStack
   stack::Any
 end
 
+"Crop the error backtrace so that errors don't expose internal TermLayouts functions in errors"
 function crop_backtrace(bt)
   i = find_first_topelevel_scope(bt)
   return bt[1:(i === nothing ? end : i)]
 end
 
+"Find the topmost non-TermLayouts scope in a backtrace"
 function find_first_topelevel_scope(bt::Vector{<:Union{Base.InterpreterIP,Ptr{Cvoid}}})
   for (i, ip) in enumerate(bt)
     st = Base.StackTraces.lookup(ip)

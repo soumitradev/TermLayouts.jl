@@ -1,6 +1,7 @@
 _setraw!(io::Base.TTY, raw) = ccall(:jl_tty_set_mode, Int32, (Ptr{Cvoid}, Int32), io.handle, raw)
 _setraw!(::IO, raw) = nothing
 
+"Read input from keyboard and handle relevant ANSI codes"
 function read_key(io=stdin)
   control_value = :CONTROL_VOID
   try
@@ -40,6 +41,7 @@ function read_key(io=stdin)
 end
 
 # basically the same as Base's `display_error`, with internal frames removed
+"Override the way errors are displayed"
 function display_repl_error(io, err, bt)
   st = stacktrace(crop_backtrace(bt))
   println()

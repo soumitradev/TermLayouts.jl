@@ -2,6 +2,7 @@ import Term
 using REPL
 using REPL.LineEdit
 
+"A struct to describe the state of TermLayouts"
 mutable struct TermLayoutState
   EVAL_CHANNEL_IN::Channel
   EVAL_CHANNEL_OUT::Channel
@@ -13,15 +14,14 @@ mutable struct TermLayoutState
   TermLayoutState() = new(Channel(0), Channel(0), nothing, false, false, false)
 end
 
-# Workaround for https://github.com/julia-vscode/julia-vscode/issues/1940
+"Workaround for https://github.com/julia-vscode/julia-vscode/issues/1940"
 struct Wrapper
   content::Any
 end
 wrap(x) = Wrapper(x)
-function unwrap(x)
-  return x.content()
-end
+unwrap(x) = x.content()
 
+"Install REPL hooks to override how the backend evaluates expressions"
 function hook_repl(repl::REPL.LineEditREPL, state::TermLayoutState)
   if state.HAS_REPL_TRANSFORM
     return
@@ -55,17 +55,20 @@ function hook_repl(repl::REPL.LineEditREPL, state::TermLayoutState)
   return nothing
 end
 
+"Transform the backend to change of expressions are evaluated"
 function transform_backend(ast, repl, main_mode, state)
   quote
     $(evalrepl)(Main, $(QuoteNode(ast)), $repl, $main_mode, $state)
   end
 end
 
+"Pass the expression into the channels"
 function run_with_backend(f, state, args...)
   put!(state.EVAL_CHANNEL_IN, (f, args))
   return unwrap(take!(state.EVAL_CHANNEL_OUT))
 end
 
+"Start the backend that will evaluate our expressions"
 function start_eval_backend(state)
   state.EVAL_BACKEND_TASK = @async begin
     Base.sigatomic_begin()
@@ -98,12 +101,14 @@ function start_eval_backend(state)
   end
 end
 
+"Get the main mode of the REPL"
 function get_main_mode(repl=Base.active_repl)
   mode = repl.interface.modes[1]
   mode isa LineEdit.Prompt || error("no julia repl mode found")
-  mode
+  return mode
 end
 
+"Evaluate expressions with custom backend, handle output and errors"
 function evalrepl(m, line, repl, main_mode, state)
   return try
     r = run_with_backend() do

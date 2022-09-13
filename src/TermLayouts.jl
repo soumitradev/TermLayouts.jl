@@ -11,6 +11,7 @@ include("strings.jl")
 
 export run
 
+"Loads TermLayouts preferences from the environment"
 function loadprefs()
   panelL_width = @load_preference("panelL_width", 70)
   panelL_title = @load_preference("panelL_title", "")
@@ -23,7 +24,7 @@ function loadprefs()
   panelR_border_color = @load_preference("panelR_border_color", "blue")
 
   if (panelL_width + panelR_width) > 100
-    @warn "Panel widths add up to more than 100, cropping right panel."
+    @warn "Panel widths add up to more than 100, cropping right panel"
     panelR_width = 100 - panelL_width
   end
 
@@ -33,10 +34,12 @@ function loadprefs()
   return TermLayoutPreferences(panelL_prefs, panelR_prefs)
 end
 
+"Initializes variables for TermLayouts"
 function initializeState()::TermLayoutState
   return TermLayoutState()
 end
 
+"Activate TermLayouts, and spawn a new REPL session"
 function run()
   prefs = loadprefs()
   state = initializeState()

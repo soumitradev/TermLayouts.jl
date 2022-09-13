@@ -1,9 +1,11 @@
+"Character struct that is used to parse ANSI strings"
 mutable struct ColoredChar
   char::Char
   color::String
   empty::Bool
 end
 
+"String structure to represent any string that can be manipulated using ANSI escape codes"
 mutable struct EditableString
   strings::Array{Array{ColoredChar}}
   xcursor::Unsigned
@@ -11,6 +13,7 @@ mutable struct EditableString
   current_color::String
 end
 
+"Add one character to the EditableString"
 function enterchar(str::EditableString, char::Char)
   if str.ycursor == 0
     str.strings = insert!(str.strings, 1, [ColoredChar(char, str.current_color, false)])

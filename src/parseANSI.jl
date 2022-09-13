@@ -1,4 +1,4 @@
-# https://en.wikipedia.org/wiki/ANSI_escape_code
+"Simplify an ANSI string into what ends up being displayed in the terminal"
 function simplifyANSI(str::String, color_enabled::Bool)
   console = EditableString([], 0, 0, "\e[0m")
   cur = 1
