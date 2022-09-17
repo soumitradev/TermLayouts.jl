@@ -1,5 +1,7 @@
 # TermLayouts.jl
 
+[![](https://img.shields.io/badge/docs-dev-teal.svg)](https://soumitradev.github.io/TermLayouts.jl/dev/)
+
 ## Description
 
 For quick prototyping, especially data pre-processing, the REPL often is a handy tool. However, the REPL interface as it exists today is too bland and makes working with Images in the REPL significantly more inconvenient. It can be improved for different workloads based on the requirements.
