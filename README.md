@@ -1,6 +1,6 @@
 # TermLayouts.jl
 
-[![](https://img.shields.io/badge/docs-dev-teal.svg)](https://soumitradev.github.io/TermLayouts.jl/dev/)
+[![](https://img.shields.io/badge/docs-dev-teal.svg)](https://soumitradev.github.io/TermLayouts.jl/dev/) [![Run Tests](https://github.com/soumitradev/TermLayouts.jl/actions/workflows/test.yml/badge.svg)](https://github.com/soumitradev/TermLayouts.jl/actions/workflows/test.yml) [![Coverage Status](https://coveralls.io/repos/github/soumitradev/TermLayouts.jl/badge.svg?branch=main)](https://coveralls.io/github/soumitradev/TermLayouts.jl?branch=main)
 
 ## Description
 
