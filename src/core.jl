@@ -3,7 +3,7 @@ using REPL
 using REPL.LineEdit
 
 "A struct to describe the state of TermLayouts"
-mutable struct TermLayoutState
+mutable struct TermLayoutsState
   EVAL_CHANNEL_IN::Channel
   EVAL_CHANNEL_OUT::Channel
   EVAL_BACKEND_TASK::Any
@@ -11,7 +11,7 @@ mutable struct TermLayoutState
   LAST_CMD_WAS_ERR::Bool
   HAS_REPL_TRANSFORM::Bool
 
-  TermLayoutState() = new(Channel(0), Channel(0), nothing, false, false, false)
+  TermLayoutsState() = new(Channel(0), Channel(0), nothing, false, false, false)
 end
 
 "Workaround for https://github.com/julia-vscode/julia-vscode/issues/1940"
@@ -22,7 +22,7 @@ wrap(x) = Wrapper(x)
 unwrap(x) = x.content()
 
 "Install REPL hooks to override how the backend evaluates expressions"
-function hook_repl(repl::REPL.LineEditREPL, state::TermLayoutState)
+function hook_repl(repl::REPL.LineEditREPL, state::TermLayoutsState)
   if state.HAS_REPL_TRANSFORM
     return
   end
@@ -111,10 +111,7 @@ end
 "Evaluate expressions with custom backend, handle output and errors"
 function evalrepl(m, line, repl, main_mode, state)
   return try
-    r = run_with_backend() do
-      f = () -> repleval(m, line, REPL.repl_filename(repl, main_mode.hist))
-      state = state
-    end
+    r = run_with_backend(() -> repleval(m, line, REPL.repl_filename(repl, main_mode.hist)), state)
     if r isa EvalError
       display_repl_error(stderr, r.err, r.bt)
       nothing

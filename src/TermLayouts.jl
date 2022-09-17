@@ -11,6 +11,9 @@ include("strings.jl")
 
 export run
 
+state = nothing
+prefs = nothing
+
 "Loads TermLayouts preferences from the environment"
 function loadprefs()
   panelL_width = @load_preference("panelL_width", 70)
@@ -35,15 +38,12 @@ function loadprefs()
 end
 
 "Initializes variables for TermLayouts"
-function initializeState()::TermLayoutState
-  return TermLayoutState()
+function initializeState()::TermLayoutsState
+  return TermLayoutsState()
 end
 
 "Activate TermLayouts, and spawn a new REPL session"
 function run()
-  prefs = loadprefs()
-  state = initializeState()
-
   # Create pipes
   inputpipe = Pipe()
   outputpipe = Pipe()
@@ -64,8 +64,9 @@ function run()
 
   # Start REPL
   print(true_stdout, "starting REPL...")
-  hook_repl(repl, state)
-  start_eval_backend(state)
+  if !state.HAS_REPL_TRANSFORM
+    hook_repl(repl, state)
+  end
 
   # Clear screen before proceeding
   # Still doesn't work on windows for some reason
@@ -166,6 +167,7 @@ function run()
 
   # Delete line (^U) and close REPL (^D)
   write(inputpipe.in, "\x15\x04")
+  redirect_stdout(true_stdout)
 
   print(true_stdout, "\e[2J")
   print(true_stdout, "\e[3J")
@@ -178,6 +180,12 @@ function run()
     close(errpipe.in)
   end
   Base.wait(t)
+end
+
+function __init__()
+  global prefs = loadprefs()
+  global state = initializeState()
+  start_eval_backend(state)
 end
 
 end
