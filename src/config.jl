@@ -1,4 +1,4 @@
-export PanelPrefs, TermLayoutPreferences
+export PanelPrefs, TermLayoutsPreferences
 
 """
 Describe the configuration of a Panel in TermLayouts
@@ -23,7 +23,7 @@ Describe the layout of Panels in TermLayouts
 - `panel1`: Left Panel
 - `panel2`: Right Panel
 """
-mutable struct TermLayoutPreferences
+mutable struct TermLayoutsPreferences
   panel1::PanelPrefs
   panel2::PanelPrefs
 end

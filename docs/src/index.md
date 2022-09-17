@@ -24,16 +24,19 @@ starting REPL...
 A TermLayouts config file is fairly simple. It can be dedescribed by the following two structures:
 
 ```@docs
-TermLayouts.TermLayoutPreferences
+TermLayouts.TermLayoutsPreferences
 TermLayouts.PanelPrefs
 ```
 
 TermLayouts is limited to two panels as of now, due to limited types of panel implementations.
 
-!!! note "TermLayout's scoped configuration"
+!!! note "TermLayouts' scoped configuration"
     If TermLayouts is the globally-installed TermLayouts, and not a version from your environment, then TermLayouts uses a global configuration for itself.
 
     If installed in an environment, TermLayouts creates a config file for itself inside that environment.
+
+!!! warning "Width overflow"
+    If your panel widths don't add up to 100 or less than 100, it will crop your gith panel by default
 
 The config file can be described with the above two structs, but in reality looks something like:
 

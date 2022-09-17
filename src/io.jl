@@ -39,15 +39,3 @@ function read_key(io=stdin)
   end
   return control_value
 end
-
-# basically the same as Base's `display_error`, with internal frames removed
-"Override the way errors are displayed"
-function display_repl_error(io, err, bt)
-  st = stacktrace(crop_backtrace(bt))
-  println()
-  printstyled(io, "The next lines will describe an error: "; bold=true, color=Base.error_color())
-  println()
-  printstyled(io, "ERROR: "; bold=true, color=Base.error_color())
-  showerror(IOContext(io, :limit => true), err, st)
-  println(io)
-end
