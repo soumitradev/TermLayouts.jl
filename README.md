@@ -1,6 +1,6 @@
 # TermLayouts.jl
 
-[![](https://img.shields.io/badge/docs-dev-teal.svg)](https://soumitradev.github.io/TermLayouts.jl/dev/) [![Run Tests](https://github.com/soumitradev/TermLayouts.jl/actions/workflows/test.yml/badge.svg)](https://github.com/soumitradev/TermLayouts.jl/actions/workflows/test.yml)
+[![](https://img.shields.io/badge/docs-dev-teal.svg)](https://soumitradev.github.io/TermLayouts.jl/dev/) [![Run Tests](https://github.com/soumitradev/TermLayouts.jl/actions/workflows/test.yml/badge.svg)](https://github.com/soumitradev/TermLayouts.jl/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/soumitradev/TermLayouts.jl/branch/main/graph/badge.svg?token=LWU3QJ7TW6)](https://codecov.io/gh/soumitradev/TermLayouts.jl)
 
 ## Description
 
