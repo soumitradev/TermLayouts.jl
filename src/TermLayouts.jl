@@ -9,8 +9,6 @@ include("io.jl")
 include("errors.jl")
 include("strings.jl")
 
-export run
-
 "Loads TermLayouts preferences from the environment"
 function loadprefs()
   panelL_width = @load_preference("panelL_width", 70)
