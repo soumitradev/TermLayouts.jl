@@ -119,23 +119,19 @@ function run()
       replstr,
       width=lpanelw,
       height=fullh,
-      style="red"
+      style=prefs.panel1.border_color,
+      title=prefs.panel1.title,
+      title_style=prefs.panel1.title_color,
     )
     rpanel = Term.Panel(
       width=rpanelw,
       height=fullh,
-      style="blue"
+      style=prefs.panel2.border_color,
+      title=prefs.panel2.title,
+      title_style=prefs.panel2.title_color,
     )
     top = lpanel * rpanel
 
-
-    # Clear screen and print the panel
-    # print(true_stdout, string(Term.Panel(
-    #   top,
-    #   width=fullw - 1,
-    #   height=fullh - 2,
-    # )))
-    # print(true_stdout, "\e[2J")
     print(true_stdout, "\e[3J")
     print(true_stdout, "\e[1;1H")
     print(true_stdout, string(top))
