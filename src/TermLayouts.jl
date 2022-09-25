@@ -1,6 +1,7 @@
 module TermLayouts
 
 using Preferences
+using Configurations
 
 include("core.jl")
 include("parseANSI.jl")
@@ -11,25 +12,27 @@ include("strings.jl")
 
 "Loads TermLayouts preferences from the environment"
 function loadprefs()
-  panelL_width = @load_preference("panelL_width", 70)
-  panelL_title = @load_preference("panelL_title", "")
-  panelL_title_color = @load_preference("panelL_title_color", "")
-  panelL_border_color = @load_preference("panelL_border_color", "red")
+  panel_defaults = Dict(
+    "left" => Dict(
+      "width" => 70,
+      "title" => "",
+      "title_color" => "",
+      "border_color" => "red"),
+    "right" => Dict(
+      "width" => 30,
+      "title" => "",
+      "title_color" => "",
+      "border_color" => "blue"
+    )
+  )
+  panel_prefs = @load_preference("panels", panel_defaults)
 
-  panelR_width = @load_preference("panelR_width", 30)
-  panelR_title = @load_preference("panelR_title", "")
-  panelR_title_color = @load_preference("panelR_title_color", "")
-  panelR_border_color = @load_preference("panelR_border_color", "blue")
-
-  if (panelL_width + panelR_width) > 100
+  if (panel_prefs["left"]["width"] + panel_prefs["right"]["width"]) > 100
     @warn "Panel widths add up to more than 100, cropping right panel"
-    panelR_width = 100 - panelL_width
+    panel_prefs["right"]["width"] = 100 - panel_prefs["left"]["width"]
   end
 
-  panelL_prefs = PanelPrefs(panelL_width, panelL_title, panelL_title_color, panelL_border_color)
-  panelR_prefs = PanelPrefs(panelR_width, panelR_title, panelR_title_color, panelR_border_color)
-
-  return TermLayoutsPreferences(panelL_prefs, panelR_prefs)
+  return TermLayoutsPreferences(from_dict(PanelPrefs, panel_prefs["left"]), from_dict(PanelPrefs, panel_prefs["right"]))
 end
 
 "Activate TermLayouts, and spawn a new REPL session"

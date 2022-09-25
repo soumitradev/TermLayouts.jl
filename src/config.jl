@@ -1,3 +1,5 @@
+using Configurations
+
 export PanelPrefs, TermLayoutsPreferences
 
 """
@@ -9,7 +11,7 @@ Describe the configuration of a Panel in TermLayouts
 - `title_color`: Panel title text color. See [here](https://fedeclaudi.github.io/Term.jl/stable/basics/colors_and_theme/)
 - `border_color`: Panel border color. See [here](https://fedeclaudi.github.io/Term.jl/stable/basics/colors_and_theme/)
 """
-mutable struct PanelPrefs
+@option "panel" mutable struct PanelPrefs
   width::Integer
   title::String
   title_color::String
