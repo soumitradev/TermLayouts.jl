@@ -14,8 +14,6 @@ end
   @test TermLayouts.read_key(IOBuffer("\e[B")) == "\e[B"
   @test TermLayouts.read_key(IOBuffer("\e[C")) == "\e[C"
   @test TermLayouts.read_key(IOBuffer("\e[D")) == "\e[D"
-  @test TermLayouts._setraw!(stdout, true) == 0
-  @test TermLayouts._setraw!(stdout, false) == 0
 end
 
 @testset "EditableString" begin
