@@ -354,7 +354,7 @@ function parseANSI(console::EditableString, str::String, color_enabled::Bool)
     else
       enterchar(console, str[cur])
     end
-    cur += 1
+    cur = nextind(str, cur)
   end
   return to_string(console, color_enabled)
 end
