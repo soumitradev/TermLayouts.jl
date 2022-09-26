@@ -4,7 +4,6 @@ using Preferences
 using Configurations
 
 include("core.jl")
-include("parseANSI.jl")
 include("config.jl")
 include("io.jl")
 include("errors.jl")
