@@ -631,7 +631,13 @@ end
     end == "t\n"
   end
 
-  @testset "TermLayouts.jl" begin
-    @test TermLayouts.loadprefs() isa TermLayouts.TermLayoutsPreferences
+  @testset "simplifyANSI" begin
+    @test begin
+      string = TermLayouts.simplifyANSI("abce\nefgh\raqcd\e[1A\e[1Dd\r\e[1C\e[1Bb\e[1;1H\e[1E\e[1F\n\e[5Ge\nabcdefg\e[4G\e[0J\e[0K\e[1S\e[1T\e[32mjulia>\e[0m\e[?2004h\e[?2004l\e[Z\eZZ", true)
+    end == "\n\n\e[0ma\e[0m\e[0mb\e[0m\e[0mc\e[0m\e[32mj\e[0m\e[32mu\e[0m\e[32ml\e[0m\e[32mi\e[0m\e[32ma\e[0m\e[32m>\e[0m\e[0m\e\e[0m\e[0m[\e[0m\e[0mZ\e[0m\e[0m\e\e[0m\e[0mZ\e[0m\e[0mZ\e[0m\e[0md\e[0m\e[0me\e[0m\n\e[0ma\e[0m\e[0mb\e[0m\e[0mc\e[0m\n\n\n"
   end
+end
+
+@testset "TermLayouts.jl" begin
+  @test TermLayouts.loadprefs() isa TermLayouts.TermLayoutsPreferences
 end
