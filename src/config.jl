@@ -27,7 +27,3 @@ mutable struct TermLayoutsPreferences
   panel1::PanelPrefs
   panel2::PanelPrefs
 end
-
-# Equality checks for easier testing
-==(a::PanelPrefs, b::PanelPrefs) = to_dict(PanelPrefs, a) == to_dict(PanelPrefs, b)
-==(a::TermLayoutsPreferences, b::TermLayoutsPreferences) = a.panel1 == a.panel1 && a.panel2 == b.panel2
