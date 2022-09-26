@@ -378,3 +378,9 @@ function parseANSI(console::EditableString, str::String, color_enabled::Bool)
   end
   return to_string(console, color_enabled)
 end
+
+"Simplify an ANSI string into what ends up being displayed in the terminal."
+function simplifyANSI(str::String, color_enabled::Bool)
+  console = EditableString([], 0, 0, "\e[0m")
+  return parseANSI(console, str, color_enabled)
+end
