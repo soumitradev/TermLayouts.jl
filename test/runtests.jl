@@ -1,6 +1,5 @@
 using Test
 using TermLayouts
-using Configurations
 
 @testset "core.jl" begin
   @test TermLayouts.wrap("This is a test").content == "This is a test"
