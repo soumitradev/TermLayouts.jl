@@ -19,7 +19,7 @@ struct Wrapper
   content::Any
 end
 wrap(x) = Wrapper(x)
-unwrap(x) = x.content()
+unwrap(x) = x.content
 
 "Start the backend that will evaluate our expressions"
 function start_eval_backend(state)
