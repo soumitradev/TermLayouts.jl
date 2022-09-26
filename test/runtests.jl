@@ -16,6 +16,11 @@ end
   @test TermLayouts.read_key(IOBuffer("\e[D")) == "\e[D"
 end
 
+@testset "errors.jl" begin
+  @test TermLayouts.EvalError("This is a test", "nothing") isa TermLayouts.EvalError
+  @test TermLayouts.EvalErrorStack("This is a test") isa TermLayouts.EvalErrorStack
+end
+
 @testset "EditableString" begin
   @testset "enterchar" begin
     @test begin
@@ -373,5 +378,95 @@ end
       string.ycursor = 8
       TermLayouts.cursor_position(string, 5, 5)
     end
+  end
+
+  @testset "erase_in_display" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.erase_in_display(string, 0)
+      string.xcursor, string.ycursor
+    end == (0, 0)
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_position(string, 2, 2)
+      TermLayouts.erase_in_display(string, 0)
+      TermLayouts.to_string(string, true)
+    end == "\e[0ma\e[0m\e[0ma\e[0m\e[0ma\e[0m\n\e[0ma\e[0m\n\n"
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_position(string, 2, 2)
+      TermLayouts.erase_in_display(string, 1)
+      TermLayouts.to_string(string, true)
+    end == "\n\e[0m \e[0m\e[0m \e[0m\e[0ma\e[0m\n\e[0ma\e[0m\e[0ma\e[0m\e[0ma\e[0m\n"
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_position(string, 2, 2)
+      TermLayouts.erase_in_display(string, 2)
+      TermLayouts.to_string(string, true)
+    end == "\n\n\n"
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.newline(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_position(string, 2, 2)
+      TermLayouts.erase_in_display(string, 3)
+      TermLayouts.to_string(string, true)
+    end == "\n\n\n"
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.erase_in_display(string, 0)
+    end
+  end
+
+  @testset "TermLayouts.jl" begin
+    @test TermLayouts.loadprefs() isa TermLayouts.TermLayoutsPreferences
   end
 end

@@ -165,16 +165,19 @@ function erase_in_display(str::EditableString, n::Int)
     return
   elseif 0 < str.ycursor <= length(str.strings)
     if n == 0
-      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for i in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
+      # Clear from cursor to end of screen
+      str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
       for i in str.ycursor+1:length(str.strings)
         str.strings[i] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[i])]
       end
     elseif n == 1
-      str.strings[str.ycursor] = str.strings[str.ycursor][1:str.xcursor-1] * (' '^((length(str.strings[str.ycursor]) + 1) - str.xcursor))
+      # Clear from cursor to beginning of screen
+      str.strings[str.ycursor] = append!([ColoredChar(' ', str.current_color, false) for _ in 1:str.xcursor], str.strings[str.ycursor][str.xcursor+1:end])
       for i in 1:str.ycursor-1
         str.strings[i] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[i])]
       end
     elseif n == 2 || n == 3
+      # Clear entire screen
       for i in 1:length(str.strings)
         str.strings[i] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[i])]
       end
