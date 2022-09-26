@@ -83,7 +83,7 @@ end
 
 "Move cursor up in the EditableString."
 function cursor_up(str::EditableString)
-  if str.ycursor == 0 || str.ycursor == length(str.strings)
+  if str.ycursor == 0
     return
   elseif 1 < str.ycursor <= length(str.strings)
     str.ycursor -= 1
