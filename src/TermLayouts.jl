@@ -118,14 +118,14 @@ function run()
       width=lpanelw,
       height=fullh,
       style=prefs.panel1.border_color,
-      title=prefs.panel1.title,
+      title=length(prefs.panel1.title) > 0 ? prefs.panel1.title : nothing,
       title_style=prefs.panel1.title_color,
     )
     rpanel = Term.Panel(
       width=rpanelw,
       height=fullh,
       style=prefs.panel2.border_color,
-      title=prefs.panel2.title,
+      title=length(prefs.panel2.title) > 0 ? prefs.panel2.title : nothing,
       title_style=prefs.panel2.title_color,
     )
     top = lpanel * rpanel
