@@ -195,13 +195,16 @@ function erase_in_line(str::EditableString, n::Int)
     return
   elseif 0 < str.ycursor <= length(str.strings)
     if n == 0
+      # Clear from cursor to end of line
       str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
     elseif n == 1
+      # Clear from cursor to start of line
       str.strings[str.ycursor] = append!(str.strings[str.ycursor][1:str.xcursor-1], [ColoredChar(' ', str.current_color, true) for _ in 1:((length(str.strings[str.ycursor])+1)-str.xcursor)])
     elseif n == 2
+      # Clear entire line
       str.strings[str.ycursor] = [ColoredChar(' ', str.current_color, true) for _ in 1:length(str.strings[str.ycursor])]
     else
-      throw(ArgumentError("n can't be above 3"))
+      throw(ArgumentError("n can't be above 2"))
     end
   else
     throw(BoundsError(str.strings, str.ycursor))
