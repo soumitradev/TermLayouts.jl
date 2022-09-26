@@ -21,7 +21,6 @@ starting REPL...
 
 ## Configuration
 
-<!-- TODO: Elaborate here -->
 TermLayouts.jl comes with it's default config, which is:
 
 ```toml
