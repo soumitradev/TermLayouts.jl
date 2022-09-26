@@ -4,6 +4,7 @@ using TermLayouts
 @testset "core.jl" begin
   @test TermLayouts.wrap("This is a test").content == "This is a test"
   @test TermLayouts.unwrap(TermLayouts.Wrapper("This is a test")) == "This is a test"
+  @test TermLayouts.start_eval_backend(TermLayouts.TermLayoutsState()) isa Task
 end
 
 @testset "io.jl" begin
@@ -13,6 +14,8 @@ end
   @test TermLayouts.read_key(IOBuffer("\e[B")) == "\e[B"
   @test TermLayouts.read_key(IOBuffer("\e[C")) == "\e[C"
   @test TermLayouts.read_key(IOBuffer("\e[D")) == "\e[D"
+  @test TermLayouts._setraw!(stdin, true) == 0
+  @test TermLayouts._setraw!(stdin, false) == 0
 end
 
 @testset "EditableString" begin
@@ -155,6 +158,18 @@ end
       TermLayouts.cursor_right(string)
       string.xcursor
     end == 6
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_left(string)
+      TermLayouts.cursor_left(string)
+      TermLayouts.cursor_right(string)
+      string.xcursor
+    end == 4
 
     @test begin
       string = TermLayouts.EditableString([], 0, 0, "\e[0m")
