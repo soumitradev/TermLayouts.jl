@@ -40,7 +40,7 @@ The proposal link can be found here: [Proposal PDF](./proposal.pdf)
 - [x] Making the overall REPL Panel asynchronous, and thus extremely smooth and responsive
 
 **What's left to do**
-- [ ] Handling cursor movement in the REPL Panel: #5
+- [ ] Handling cursor movement in the REPL Panel: [#5](https://github.com/soumitradev/TermLayouts.jl/issues/5)
   - Currently on hold because I couldn't find a way to get the cursor position from a `TTYTerminal`, and even [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) didn't work. One possible fix is to manually keep track of the cursor position using keystrokes, but then there are too many keystrokes and cases to handle
 - [ ] Additional Panel types, such as Plots, Image panel, etc.
   - Image panel should probably use: https://github.com/JuliaImages/XTermColors.jl (backend for https://github.com/JuliaImages/ImageInTerminal.jl). Sixel support could also work.
