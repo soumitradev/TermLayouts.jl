@@ -105,7 +105,7 @@ function run()
     last_line = string(reshaped_cropped[max(1, length(reshaped_cropped) - 1)])
 
     text_before_cursor = simplifyANSI(last_line, false)
-    # TODO: Allow cursor to move around after
+    # TODO: #5 Allow cursor to move around after
     cursorX = length(text_before_cursor) + 3
     cursorY = length(reshaped_cropped)
 
