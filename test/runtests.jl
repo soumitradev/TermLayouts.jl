@@ -574,6 +574,63 @@ end
     end
   end
 
+  @testset "newline" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.newline(string)
+      TermLayouts.to_string(string, true)
+    end == "\n\n"
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_left(string)
+      TermLayouts.cursor_left(string)
+      TermLayouts.cursor_left(string)
+      TermLayouts.newline(string)
+      TermLayouts.to_string(string, true)
+    end == "\e[0ma\e[0m\e[0ma\e[0m\n\e[0ma\e[0m\e[0ma\e[0m\e[0ma\e[0m\n"
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.newline(string)
+    end
+  end
+
+  @testset "to_string" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.entercolor(string, "\e[32m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.entercolor(string, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.entercolor(string, "\e[12m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.to_string(string, true)
+    end == "\e[32ma\e[0m\e[0ma\e[0m\e[12ma\e[0m\n"
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.entercolor(string, "\e[32m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.entercolor(string, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.entercolor(string, "\e[12m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.to_string(string, false)
+    end == "aaa\n"
+
+    @test begin
+      string = TermLayouts.EditableString([[TermLayouts.ColoredChar(' ', "\e[0m", true), TermLayouts.ColoredChar(' ', "\e[0m", true), TermLayouts.ColoredChar(' ', "\e[0m", true), TermLayouts.ColoredChar('t', "\e[0m", false)]], 5, 1, "\e[0m")
+      TermLayouts.to_string(string, false)
+    end == "t\n"
+  end
+
   @testset "TermLayouts.jl" begin
     @test TermLayouts.loadprefs() isa TermLayouts.TermLayoutsPreferences
   end
