@@ -120,7 +120,7 @@ end
 
 "Move the cursor to the previous line in the EditableString."
 function cursor_prev_line(str::EditableString)
-  if str.ycursor == 0 || str.ycursor == length(str.strings)
+  if str.ycursor == 0 || str.ycursor == 1
     return
   elseif 1 < str.ycursor <= length(str.strings)
     str.ycursor -= 1

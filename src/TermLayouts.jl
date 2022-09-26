@@ -61,7 +61,6 @@ function run()
   # Start REPL
   print(true_stdout, "starting REPL...")
   start_eval_backend(state)
-  # hook_repl(repl, state)
 
   # Clear screen before proceeding
   # Still doesn't work on windows for some reason

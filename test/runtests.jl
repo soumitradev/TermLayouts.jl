@@ -207,4 +207,158 @@ end
       TermLayouts.cursor_down(string)
     end
   end
+
+  @testset "carriage_return" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.carriage_return(string)
+      string.ycursor
+    end == 0
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.carriage_return(string)
+      string.xcursor
+    end == 1
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.carriage_return(string)
+    end
+  end
+
+  @testset "cursor_next_line" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.cursor_next_line(string)
+      string.ycursor
+    end == 0
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_next_line(string)
+      string.ycursor
+    end == 1
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_down(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_down(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_up(string)
+      TermLayouts.cursor_next_line(string)
+      string.ycursor
+    end == 3
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.cursor_next_line(string)
+    end
+  end
+
+  @testset "cursor_prev_line" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.cursor_prev_line(string)
+      string.ycursor
+    end == 0
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_prev_line(string)
+      string.ycursor
+    end == 1
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_down(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_prev_line(string)
+      string.ycursor
+    end == 1
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.cursor_prev_line(string)
+    end
+  end
+
+  @testset "cursor_horizontal_absolute" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.cursor_horizontal_absolute(string, 10)
+      string.xcursor
+    end == 0
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_horizontal_absolute(string, 3)
+      string.xcursor
+    end == 3
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_horizontal_absolute(string, 5)
+      string.xcursor
+    end == 5
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.cursor_horizontal_absolute(string, 5)
+    end
+  end
+
+  @testset "cursor_position" begin
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.cursor_position(string, 10, 10)
+      string.xcursor, string.ycursor
+    end == (0, 0)
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_down(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_down(string)
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_position(string, 2, 2)
+      string.xcursor, string.ycursor
+    end == (2, 2)
+
+    @test begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      TermLayouts.enterchar(string, 'a')
+      TermLayouts.cursor_position(string, 5, 5)
+      string.xcursor, string.ycursor
+    end == (5, 5)
+
+    @test_throws BoundsError begin
+      string = TermLayouts.EditableString([], 0, 0, "\e[0m")
+      string.ycursor = 8
+      TermLayouts.cursor_position(string, 5, 5)
+    end
+  end
 end
