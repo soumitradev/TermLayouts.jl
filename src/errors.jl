@@ -6,4 +6,3 @@ end
 struct EvalErrorStack
   stack::Any
 end
-

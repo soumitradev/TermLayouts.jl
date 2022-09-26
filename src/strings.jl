@@ -1,11 +1,11 @@
-"Character struct that is used to parse ANSI strings"
+"Character struct that is used to parse ANSI strings."
 mutable struct ColoredChar
   char::Char
   color::String
   empty::Bool
 end
 
-"String structure to represent any string that can be manipulated using ANSI escape codes"
+"String structure to represent any string that can be manipulated using ANSI escape codes."
 mutable struct EditableString
   strings::Array{Array{ColoredChar}}
   xcursor::Unsigned
@@ -13,7 +13,7 @@ mutable struct EditableString
   current_color::String
 end
 
-"Add one character to the EditableString"
+"Add one character to the EditableString."
 function enterchar(str::EditableString, char::Char)
   if str.ycursor == 0
     str.strings = insert!(str.strings, 1, [ColoredChar(char, str.current_color, false)])
@@ -28,6 +28,7 @@ function enterchar(str::EditableString, char::Char)
   end
 end
 
+"Begin typing in a color into the EditableString."
 function entercolor(str::EditableString, color::String)
   if 0 <= str.ycursor <= length(str.strings)
     str.current_color = color
@@ -36,6 +37,7 @@ function entercolor(str::EditableString, color::String)
   end
 end
 
+"Move cursor down in the EditableString."
 function cursor_down(str::EditableString)
   if str.ycursor == 0
     return
@@ -54,6 +56,7 @@ function cursor_down(str::EditableString)
   end
 end
 
+"Move cursor left in the EditableString."
 function cursor_left(str::EditableString)
   if str.xcursor == 0 || str.xcursor == 1
     return
@@ -64,6 +67,7 @@ function cursor_left(str::EditableString)
   end
 end
 
+"Move cursor right in the EditableString."
 function cursor_right(str::EditableString)
   if str.xcursor == 0
     return
@@ -77,6 +81,7 @@ function cursor_right(str::EditableString)
   end
 end
 
+"Move cursor up in the EditableString."
 function cursor_up(str::EditableString)
   if str.ycursor == 0 || str.ycursor == length(str.strings)
     return
@@ -90,6 +95,7 @@ function cursor_up(str::EditableString)
   end
 end
 
+"Enter a carriage return in the EditableString."
 function carriage_return(str::EditableString)
   if str.ycursor == 0
     return
@@ -100,6 +106,7 @@ function carriage_return(str::EditableString)
   end
 end
 
+"Move the cursor to the next line in the EditableString."
 function cursor_next_line(str::EditableString)
   if str.ycursor == 0 || str.ycursor == length(str.strings)
     return
@@ -111,6 +118,7 @@ function cursor_next_line(str::EditableString)
   end
 end
 
+"Move the cursor to the previous line in the EditableString."
 function cursor_prev_line(str::EditableString)
   if str.ycursor == 0 || str.ycursor == length(str.strings)
     return
@@ -122,6 +130,7 @@ function cursor_prev_line(str::EditableString)
   end
 end
 
+"Set the absolute horizontal position of the cursor in the EditableString."
 function cursor_horizontal_absolute(str::EditableString, x::Int)
   if str.ycursor == 0
     return
@@ -135,6 +144,7 @@ function cursor_horizontal_absolute(str::EditableString, x::Int)
   end
 end
 
+"Set the absolute position of the cursor in the EditableString."
 function cursor_position(str::EditableString, x::Int, y::Int)
   if str.ycursor == 0
     return
@@ -149,6 +159,7 @@ function cursor_position(str::EditableString, x::Int, y::Int)
   end
 end
 
+"Delete parts of the display in the EditableString."
 function erase_in_display(str::EditableString, n::Int)
   if str.ycursor == 0
     return
@@ -175,6 +186,7 @@ function erase_in_display(str::EditableString, n::Int)
   end
 end
 
+"Erase parts of the line the cursor is in inside the EditableString."
 function erase_in_line(str::EditableString, n::Int)
   if str.ycursor == 0
     return
@@ -193,6 +205,7 @@ function erase_in_line(str::EditableString, n::Int)
   end
 end
 
+"Scroll up by `n` lines in the EditableString."
 function scroll_up(str::EditableString, n::Int)
   if str.ycursor == 0
     return
@@ -203,6 +216,7 @@ function scroll_up(str::EditableString, n::Int)
   end
 end
 
+"Scroll down by `n` lines in the EditableString."
 function scroll_down(str::EditableString, n::Int)
   if str.ycursor == 0
     return
@@ -213,6 +227,7 @@ function scroll_down(str::EditableString, n::Int)
   end
 end
 
+"Insert a newline in the EditableString. Equivalent to printing a `\\n`."
 function newline(str::EditableString)
   if str.ycursor == 0
     str.strings = append!([[], []], str.strings)
@@ -228,6 +243,7 @@ function newline(str::EditableString)
   end
 end
 
+"Get the current state of the EditableString as a string."
 function to_string(str::EditableString, color_enabled::Bool)
   builtstring = ""
   for line in str.strings
@@ -245,6 +261,7 @@ function to_string(str::EditableString, color_enabled::Bool)
   return builtstring
 end
 
+"Parse ANSI text, and update the state of the EditableString."
 function parseANSI(console::EditableString, str::String, color_enabled::Bool)
   cur = 1
   while cur <= length(str)
